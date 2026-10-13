@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}Student Registration - Darbak.AI{% endblock %}
+
+{% block extra_css %}
+    .auth-container { max-width: 800px; margin: 40px auto; background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+    .auth-title { text-align: center; color: #9013FE; margin-bottom: 30px; font-size: 28px; font-weight: bold; }
+    
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .full-width { grid-column: 1 / -1; }
+    
+    .input-group { position: relative; margin-bottom: 15px; }
+    .input-group i { position: absolute; left: 15px; top: 14px; color: #888; font-size: 16px; }
+    .input-group input, .input-group select { width: 100%; padding: 12px 15px 12px 45px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; box-sizing: border-box; background: #fdfdfd; transition: 0.3s; }
+    .input-group input:focus, .input-group select:focus { border-color: #9013FE; outline: none; background: #fff; box-shadow: 0 0 5px rgba(144, 19, 254, 0.2); }
+    
+    .file-upload { background: #f8f9fa; border: 2px dashed #ddd; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 15px; cursor: pointer; transition: 0.3s; }
+    .file-upload:hover { border-color: #9013FE; background: #f3e8ff; }
+    .file-upload label { cursor: pointer; font-weight: bold; color: #555; display: block; }
+    .file-upload input { display: none; }
+    .file-name { font-size: 12px; color: #9013FE; margin-top: 5px; display: block; }
+
+    .section-title { font-size: 16px; color: #333; margin: 20px 0 10px; border-bottom: 2px solid #eee; padding-bottom: 5px; grid-column: 1 / -1; }
+
+    button.submit-btn { width: 100%; padding: 15px; background: linear-gradient(to right, #4A90E2, #9013FE); color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 20px; transition: 0.3s; grid-column: 1 / -1; }
+    button.submit-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+    .login-link { text-align: center; margin-top: 20px; grid-column: 1 / -1; }
+    .login-link a { color: #9013FE; text-decoration: none; font-weight: bold; }
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <h2 class="auth-title">🎓 Student Registration</h2>
+    
+    <form id="registerForm" onsubmit="handleRegister(event)" class="form-grid">
+        
+        <div class="section-title">Personal Information</div>
+        
+        <div class="input-group">
+            <i class="fas fa-user"></i>
+            <input type="text" name="first_name" placeholder="First Name" required>
+        </div>
+        <div class="input-group">
+            <i class="fas fa-user"></i>
+            <input type="text" name="last_name" placeholder="Last Name" required>
+        </div>
+        
+        <div class="input-group">
+            <i class="fas fa-envelope"></i>
+            <input type="email" name="email" placeholder="Email Address" required>
+        </div>
+        <div class="input-group">
+            <i class="fas fa-phone"></i>
+            <input type="text" name="phone" placeholder="Phone Number" required>
+        </div>
+
+        <div class="input-group">
+            <i class="fas fa-calendar-alt"></i>
+            <input type="date" name="dob" title="Date of Birth" required>
+        </div>
+
+        <div class="input-group">
+            <i class="fas fa-venus-mars"></i>
+            <select name="gender" required>
+                <option value="" disabled selected>Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <i class="fas fa-flag"></i>
+            <input type="text" name="nationality" placeholder="Nationality (e.g., Saudi)" required>
+        </div>
+        <div class="input-group">
+            <i class="fas fa-map-marker-alt"></i>
+            <input type="text" name="location" placeholder="City of Residence (e.g., Riyadh)" required>
+        </div>
+        <div class="input-group full-width">
+            <i class="fas fa-lock"></i>
+            <input type="password" name="password" placeholder="Password" required>
+        </div>
+
+        <div class="section-title">Academic Details (<span class="notranslate" translate="no">CC2020</span> Standards)</div>
+
+        <div class="input-group full-width">
+            <i class="fas fa-university"></i>
+            <input type="text" name="university" placeholder="University Name" required>
+        </div>
+
+        <div class="input-group">
+            <i class="fas fa-graduation-cap"></i>
+            <select name="major" required>
+                <option value="" disabled selected>Select Major...</option>
+                <option value="Computer Science">Computer Science</option>
+                <option value="Software Engineering">Software Engineering</option>
+                <option value="Information Technology">Information Technology</option>
+                <option value="Information Systems">Information Systems</option>
+                <option value="Computer Engineering">Computer Engineering</option>
+                <option value="Cybersecurity">Cybersecurity</option>
+                <option value="Data Science">Data Science</option>
+            </select>
+        </div>
+
+        <div class="input-group" style="display: flex; gap: 10px;">
+            <div style="position: relative; flex: 2;">
+                <i class="fas fa-star" style="z-index: 2;"></i>
+                <input type="number" step="0.01" name="gpa" placeholder="GPA" required style="padding-left:45px; width:100%;">
+            </div>
+            <div style="position: relative; flex: 1;">
+                <select name="gpa_scale" style="padding-left:10px; width:100%;">
+                    <option value="4.0">Out of 4.0</option>
+                    <option value="5.0">Out of 5.0</option>
+                    <option value="100">Out of 100</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="section-title">Links & Files</div>
+
+        <div class="input-group">
+            <i class="fab fa-linkedin"></i>
+            <input type="url" name="linkedin_link" placeholder="LinkedIn Profile URL (Optional)">
+        </div>
+        <div class="input-group">
+            <i class="fab fa-github"></i>
+            <input type="url" name="github_link" placeholder="GitHub Profile URL (Optional)">
+        </div>
+
+        <div class="file-upload full-width" onclick="document.getElementById('transcript').click()">
+            <label>📄 Upload Official Transcript (PDF) - REQUIRED</label>
+            <span style="font-size:11px; color:#888;">We need this to verify your Major and GPA automatically.</span>
+            <input type="file" id="transcript" name="transcript_file" accept=".pdf" required onchange="updateFileName('transcript', 'trans_name')">
+            <span class="file-name" id="trans_name"></span>
+        </div>
+
+        <div class="file-upload" onclick="document.getElementById('cv').click()">
+            <label>📄 Upload CV (PDF)</label>
+            <input type="file" id="cv" name="cv_file" accept=".pdf" onchange="updateFileName('cv', 'cv_name')">
+            <span class="file-name" id="cv_name"></span>
+        </div>
+
+        <div class="file-upload" onclick="document.getElementById('pic').click()">
+            <label>🖼️ Upload Profile Picture</label>
+            <input type="file" id="pic" name="profile_pic" accept="image/*" onchange="updateFileName('pic', 'pic_name')">
+            <span class="file-name" id="pic_name"></span>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">Register & Verify Data</button>
+        
+        <div class="login-link">
+            Already have an account? <a href="/login">Login here</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function updateFileName(inputId, spanId) {
+        const file = document.getElementById(inputId).files[0];
+        if(file) document.getElementById(spanId).innerText = file.name;
+    }
+
+    async function handleRegister(e) {
+        e.preventDefault();
+        const btn = document.getElementById('submitBtn');
+        const originalText = btn.innerText;
+        btn.innerText = "⏳ Verifying Transcript & Registering...";
+        btn.disabled = true;
+
+        const formData = new FormData(document.getElementById('registerForm'));
+
+        try {
+            const response = await fetch('/api/register/student', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            
+            if(result.status === 'success') {
+                alert(result.message);
+                window.location.href = '/login';
+            } else {
+                alert(result.message);
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        } catch (err) {
+            alert("Error connecting to server.");
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,288 @@
+{% extends "base.html" %}
+
+{% block title %}Employer Portal - Darbak.AI{% endblock %}
+
+{% block header_actions %}
+    <a href="/profile" class="profile-btn">👤 Company Profile</a>
+    <a href="javascript:void(0)" onclick="logout()" class="logout-btn">Logout</a>
+{% endblock %}
+
+{% block extra_css %}
+    .dashboard-container { max-width: 1000px; width: 100%; margin: 0 auto; }
+    
+    .page-title { margin-bottom: 30px; color: #9013FE; text-align: center; font-size: 28px; }
+
+    .search-box { 
+        display: flex; gap: 15px; background: white; padding: 20px; 
+        border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); margin-bottom: 30px;
+    }
+    select { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; font-weight: bold; color: #333; }
+    select:focus { border-color: #9013FE; outline: none; }
+    
+    button { 
+        padding: 12px 40px; background: linear-gradient(to right, #4A90E2, #9013FE); color: white; border: none; 
+        border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; 
+        transition: 0.3s; box-shadow: 0 4px 10px rgba(144, 19, 254, 0.2);
+    }
+    button:hover { opacity: 0.9; transform: translateY(-2px); }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+    
+    .candidate-card {
+        background: white; border-radius: 15px; padding: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center;
+        transition: transform 0.2s; position: relative; overflow: hidden;
+        border-bottom: 5px solid #4A90E2;
+        display: flex;
+        flex-direction: column;
+    }
+    .candidate-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-bottom: 5px solid #9013FE; }
+
+    .profile-pic {
+        width: 90px; height: 90px; border-radius: 50%; object-fit: cover;
+        border: 3px solid #f0f2f5; margin-bottom: 15px; margin-left: auto; margin-right: auto;
+    }
+
+    .name { font-size: 18px; font-weight: bold; color: #333; margin: 0; }
+    .major { color: #777; font-size: 14px; margin-bottom: 5px; }
+
+    .score-badge {
+        position: absolute; top: 15px; right: 15px;
+        background: #e1f7e7; color: #2ecc71; padding: 5px 10px;
+        border-radius: 20px; font-weight: bold; font-size: 13px;
+    }
+    .score-med { background: #fff3cd; color: #f39c12; }
+    .score-available { background: #e0f2fe; color: #4A90E2; }
+
+    .skills-group { margin-bottom: 10px; text-align: left; background: #fafafa; padding: 12px; border-radius: 8px; border: 1px solid #eee; }
+    .skills-group-title { font-size: 11px; color: #888; text-transform: uppercase; margin-bottom: 8px; font-weight: bold; }
+    .skills-container { display: flex; flex-wrap: wrap; gap: 5px; justify-content: flex-start; }
+    
+    .skill-tag { background: #e0f2fe; color: #0284c7; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; border: 1px solid #bae6fd; }
+    .skill-tag.soft-tag { background: #f3e8ff; color: #9333ea; border: 1px solid #e9d5ff; }
+
+    .card-actions { display: flex; gap: 5px; margin-top: auto; padding-top: 15px; flex-wrap: wrap; justify-content: center; }
+    .btn-action {
+        flex: 1; display: block; padding: 8px 5px; background: #eef2f7; color: #4A90E2;
+        text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 12px;
+        transition: 0.3s; border: 1px solid transparent; box-sizing: border-box;
+        min-width: 60px; text-align: center; cursor: pointer;
+    }
+    .btn-action:hover { background: #4A90E2; color: white; }
+    .btn-action.disabled { opacity: 0.5; pointer-events: none; cursor: not-allowed; }
+
+    .btn-linkedin { background: #0077b5; color: white; }
+    .btn-linkedin:hover { background: #005582; color: white; }
+    .btn-github { background: #24292e; color: white; }
+    .btn-github:hover { background: #1b1f23; color: white; }
+    .btn-contact { background: #2ecc71; color: white; border: none; }
+    .btn-contact:hover { background: #27ae60; color: white; }
+
+    .no-results { text-align: center; color: #888; grid-column: 1 / -1; margin-top: 20px; font-size: 16px; }
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <h2 class="page-title">💼 Find Top Talent (<span class="notranslate" translate="no">CC2020</span> Verified)</h2>
+
+    <div class="search-box">
+        <select id="jobRole" class="notranslate" translate="no">
+            <option value="" disabled selected>Select Job Role (CC2020 Standard)...</option>
+            <option value="Software Developer / Engineer">Software Developer / Engineer</option>
+            <option value="Data Scientist / Analyst">Data Scientist / Analyst</option>
+            <option value="Cybersecurity Analyst / Professional">Cybersecurity Analyst</option>
+            <option value="Database Administrator">Database Administrator</option>
+            <option value="Network/Systems Administrator">Network/Systems Administrator</option>
+            <option value="Business Systems Analyst">Business Systems Analyst</option>
+            <option value="Embedded Systems Engineer">Embedded Systems Engineer</option>
+        </select>
+        <button onclick="searchCandidates()">Find Specific Talent</button>
+    </div>
+
+    <div id="resultsGrid" class="grid"></div>
+    <p id="msg" class="no-results" style="display:none;">No candidates found matching CC2020 requirements for this role.</p>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    window.onload = async function() {
+        const btn = document.querySelector('button');
+        btn.innerText = "Loading Talent...";
+        btn.disabled = true;
+
+        try {
+            const response = await fetch('/api/students/all');
+            const allCandidates = await response.json();
+            renderCandidates(allCandidates, false); 
+        } catch (err) {
+            console.error(err);
+        } finally {
+            btn.innerText = "Find Specific Talent";
+            btn.disabled = false;
+        }
+    };
+
+    async function searchCandidates() {
+        const jobRole = document.getElementById('jobRole').value;
+        if(!jobRole) {
+            alert("Please select a job role first!");
+            return;
+        }
+
+        const btn = document.querySelector('button');
+        btn.innerText = "Searching...";
+        btn.disabled = true;
+
+        try {
+            const response = await fetch('/api/search', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ job_role: jobRole }) 
+            });
+
+            const candidates = await response.json();
+            renderCandidates(candidates, true); 
+
+        } catch (err) {
+            console.error(err);
+            alert("Error searching.");
+        } finally {
+            btn.innerText = "Find Specific Talent";
+            btn.disabled = false;
+        }
+    }
+
+    function renderCandidates(candidates, showScore) {
+        const grid = document.getElementById('resultsGrid');
+        const msg = document.getElementById('msg');
+        grid.innerHTML = ""; 
+
+        if (candidates.length > 0) {
+            msg.style.display = "none";
+            
+            candidates.forEach(c => {
+                let badgeHtml = '';
+                if(showScore) {
+                    const scoreClass = c.score >= 75 ? '' : 'score-med'; 
+                    badgeHtml = `<div class="score-badge ${scoreClass}">${c.score}% Match</div>`;
+                } else {
+                    badgeHtml = `<div class="score-badge score-available">Available</div>`;
+                }
+                
+                let techHtml = c.tech_skills.slice(0, 5).map(s => `<span class="skill-tag">${s}</span>`).join('');
+                if(c.tech_skills.length > 5) techHtml += `<span class="skill-tag">+${c.tech_skills.length - 5}</span>`;
+                if(c.tech_skills.length === 0) techHtml = `<span style="font-size:11px; color:#aaa; font-style:italic;">No tech skills added</span>`;
+
+                let softHtml = c.soft_skills.slice(0, 4).map(s => `<span class="skill-tag soft-tag">${s}</span>`).join('');
+                if(c.soft_skills.length > 4) softHtml += `<span class="skill-tag soft-tag">+${c.soft_skills.length - 4}</span>`;
+                if(c.soft_skills.length === 0) softHtml = `<span style="font-size:11px; color:#aaa; font-style:italic;">No soft skills added</span>`;
+
+            // (داخل دالة renderCandidates)
+                const cvButton = c.cv_link !== '#' 
+                    ? `<a href="${c.cv_link}" target="_blank" class="btn-action"><span class="notranslate" translate="no">📄 CV</span></a>`
+                    : `<span class="btn-action disabled">No <span class="notranslate" translate="no">CV</span></span>`;
+
+                let linkedinButton = '';
+                if (c.linkedin_link && c.linkedin_link.trim() !== '') {
+                    let theLink = c.linkedin_link.startsWith('http') ? c.linkedin_link : 'https://' + c.linkedin_link;
+                    linkedinButton = `<a href="${theLink}" target="_blank" class="btn-action btn-linkedin notranslate" translate="no">💼 In</a>`;
+                }
+
+                let githubButton = '';
+                if (c.github_link && c.github_link.trim() !== '') {
+                    let theLink = c.github_link.startsWith('http') ? c.github_link : 'https://' + c.github_link;
+                    githubButton = `<a href="${theLink}" target="_blank" class="btn-action btn-github notranslate" translate="no">🐙 Git</a>`;
+                }
+
+                // 🌟 إضافة زر البورتفوليو الجديد هنا 🌟
+                let portfolioButton = '';
+                if (c.portfolio_link && c.portfolio_link.trim() !== '') {
+                    let theLink = c.portfolio_link.startsWith('http') ? c.portfolio_link : 'https://' + c.portfolio_link;
+                    portfolioButton = `<a href="${theLink}" target="_blank" class="btn-action btn-portfolio notranslate" translate="no">🌐 Web</a>`;
+                }
+                
+                const contactButton = `<button onclick="contactStudent('${c.email}', this)" class="btn-action btn-contact notranslate" translate="no">✉️ Contact</button>`;
+
+                const locationStr = c.location || 'Unknown';
+                const nationalityStr = c.nationality || 'Unknown';
+
+                const card = `
+                    <div class="candidate-card">
+                        ${badgeHtml}
+                        <img src="${c.profile_pic}" class="profile-pic" alt="User">
+                        <h3 class="name notranslate" translate="no">${c.name}</h3>
+                        <p class="major"><span class="notranslate" translate="no">${c.major}</span> • <span class="notranslate" translate="no">GPA: ${c.gpa_display}</span></p>
+                        
+                        <p style="font-size:12px; color:#888; margin-top:0; margin-bottom: 15px; font-weight:bold;">
+                            📍 <span class="notranslate" translate="no">${locationStr}</span> • 🌍 <span class="notranslate" translate="no">${nationalityStr}</span>
+                        </p>
+                        
+                        <div style="flex-grow: 1;">
+                            <div class="skills-group notranslate" translate="no">
+                                <div class="skills-group-title">⚙️ Tech Skills</div>
+                                <div class="skills-container">${techHtml}</div>
+                            </div>
+                            
+                            <div class="skills-group notranslate" translate="no" style="margin-bottom: 20px;">
+                                <div class="skills-group-title">🤝 Soft Skills & Dispositions</div>
+                                <div class="skills-container">${softHtml}</div>
+                            </div>
+                        </div>
+
+                        <div class="card-actions">
+                            ${contactButton}
+                            ${cvButton}
+                            ${linkedinButton}
+                            ${githubButton}
+                            ${portfolioButton}
+                        </div>
+                    </div>
+                `;
+                grid.innerHTML += card;    
+            });
+        } else {
+            msg.style.display = "block";
+        }
+    }
+
+    async function contactStudent(studentEmail, btnElement) {
+        const userStr = localStorage.getItem('darbak_user');
+        if(!userStr) return;
+        const employer = JSON.parse(userStr);
+        
+        const jobRole = document.getElementById('jobRole').value || "General Opportunity";
+        
+        const originalText = btnElement.innerHTML;
+        btnElement.innerHTML = "⏳ Sending...";
+        btnElement.disabled = true;
+
+        try {
+            const res = await fetch('/api/contact_student', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    employer_email: employer.work_email,
+                    student_email: studentEmail,
+                    job_role: jobRole
+                })
+            });
+            const result = await res.json();
+            
+            if(result.status === 'success') {
+                alert(result.message);
+                btnElement.innerHTML = "✅ Sent!";
+                btnElement.style.background = "#27ae60"; 
+            } else {
+                alert(result.message);
+                btnElement.innerHTML = originalText;
+                btnElement.disabled = false;
+            }
+        } catch(e) {
+            alert("Error connecting to server.");
+            btnElement.innerHTML = originalText;
+            btnElement.disabled = false;
+        }
+    }
+</script>
+{% endblock %}

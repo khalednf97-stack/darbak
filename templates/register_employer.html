@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Employer Registration - Darbak.AI{% endblock %}
+
+{% block extra_css %}
+    .auth-container { max-width: 800px; margin: 40px auto; background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+    .auth-title { text-align: center; color: #9013FE; margin-bottom: 30px; font-size: 28px; font-weight: bold; }
+    
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .full-width { grid-column: 1 / -1; }
+    
+    .input-group { position: relative; margin-bottom: 15px; }
+    .input-group i { position: absolute; left: 15px; top: 14px; color: #888; font-size: 16px; }
+    .input-group input, .input-group select { width: 100%; padding: 12px 15px 12px 45px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; box-sizing: border-box; background: #fdfdfd; transition: 0.3s; }
+    .input-group input:focus, .input-group select:focus { border-color: #9013FE; outline: none; background: #fff; box-shadow: 0 0 5px rgba(144, 19, 254, 0.2); }
+    
+    .section-title { font-size: 16px; color: #333; margin: 20px 0 10px; border-bottom: 2px solid #eee; padding-bottom: 5px; grid-column: 1 / -1; }
+
+    button.submit-btn { width: 100%; padding: 15px; background: linear-gradient(to right, #4A90E2, #9013FE); color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 20px; transition: 0.3s; grid-column: 1 / -1; }
+    button.submit-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+    .login-link { text-align: center; margin-top: 20px; grid-column: 1 / -1; }
+    .login-link a { color: #9013FE; text-decoration: none; font-weight: bold; }
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <h2 class="auth-title">💼 Employer Registration</h2>
+    
+    <form id="employerRegisterForm" onsubmit="handleEmployerRegister(event)" class="form-grid">
+        
+        <div class="section-title">Company Information</div>
+        
+        <div class="input-group">
+            <i class="fas fa-building"></i>
+            <input type="text" name="company_name" placeholder="Company Name" required>
+        </div>
+        <div class="input-group full-width">
+            <i class="fas fa-id-card"></i>
+            <input type="text" name="cr_number" placeholder="Commercial Registration (CR) Number">
+        </div>
+        <div class="input-group">
+            <i class="fas fa-industry"></i>
+            <input type="text" name="industry" placeholder="Industry (e.g., Technology)" required>
+        </div>
+        <div class="input-group">
+            <i class="fas fa-map-marker-alt"></i>
+            <input type="text" name="location" placeholder="Location (City, Country)" required>
+        </div>
+        <div class="input-group full-width">
+            <i class="fas fa-globe"></i>
+            <input type="url" name="website" placeholder="Company Website (https://...)">
+        </div>
+
+        <div class="section-title">Recruiter Details</div>
+
+        <div class="input-group">
+            <i class="fas fa-user-tie"></i>
+            <input type="text" name="recruiter_name" placeholder="Full Name" required>
+        </div>
+        <div class="input-group">
+            <i class="fas fa-briefcase"></i>
+            <input type="text" name="job_title" placeholder="Job Title (e.g., HR Manager)" required>
+        </div>
+        <div class="input-group">
+            <i class="fas fa-envelope"></i>
+            <input type="email" name="work_email" placeholder="Work Email" required>
+        </div>
+        <div class="input-group">
+            <i class="fas fa-phone"></i>
+            <input type="text" name="phone" placeholder="Phone Number" required>
+        </div>
+        <div class="input-group full-width">
+            <i class="fab fa-linkedin"></i>
+            <input type="url" name="linkedin_link" placeholder="LinkedIn Profile URL (Optional)">
+        </div>
+        
+        <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="password" name="password" placeholder="Password" required>
+        </div>
+        <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="confirm_password" placeholder="Confirm Password" required>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">Create Employer Account</button>
+        
+        <div class="login-link">
+            Already have an account? <a href="/login">Login here</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    async function handleEmployerRegister(e) {
+        e.preventDefault();
+        
+        // التحقق من تطابق كلمتي المرور قبل الإرسال للسيرفر
+        const pwd = document.getElementById('password').value;
+        const confirmPwd = document.getElementById('confirm_password').value;
+        
+        if(pwd !== confirmPwd) {
+            alert("Passwords do not match! Please check again.");
+            return;
+        }
+
+        const btn = document.getElementById('submitBtn');
+        const originalText = btn.innerText;
+        btn.innerText = "⏳ Creating Account...";
+        btn.disabled = true;
+
+        const formData = new FormData(document.getElementById('employerRegisterForm'));
+        const dataObj = Object.fromEntries(formData.entries());
+
+        try {
+            const response = await fetch('/api/register/employer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dataObj)
+            });
+            const result = await response.json();
+            
+            if(result.status === 'success') {
+                alert(result.message);
+                window.location.href = '/login';
+            } else {
+                alert(result.message);
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        } catch (err) {
+            alert("Error connecting to server.");
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
+    }
+</script>
+{% endblock %}

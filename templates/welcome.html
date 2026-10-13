@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome to Darbak.AI{% endblock %}
+
+{% block header_actions %}
+    <a href="/login" class="login-btn">Login</a>
+{% endblock %}
+
+{% block extra_css %}
+    .login-btn { color: #4A90E2; text-decoration: none; border: 2px solid #4A90E2; padding: 6px 20px; border-radius: 20px; font-weight: bold; font-size: 14px; transition: 0.3s; }
+    .login-btn:hover { background: #4A90E2; color: white; }
+
+    .welcome-container { text-align: center; max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; justify-content: center; }
+    .hero-title { font-size: 3.5rem; color: #2c3e50; margin-bottom: 10px; }
+    .hero-title span.gradient-text { background: linear-gradient(to right, #4A90E2, #9013FE); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero-subtitle { font-size: 1.2rem; color: #666; margin-bottom: 50px; line-height: 1.6; }
+    .cards-wrapper { display: flex; gap: 30px; justify-content: center; flex-wrap: wrap; }
+    
+    .role-card { background: white; border-radius: 15px; padding: 40px 30px; width: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); text-decoration: none; color: inherit; transition: transform 0.3s, box-shadow 0.3s; border-top: 5px solid transparent; }
+    .role-card:hover { transform: translateY(-10px); box-shadow: 0 15px 35px rgba(0,0,0,0.12); }
+    .role-card.student:hover { border-top-color: #4A90E2; }
+    .role-card.employer:hover { border-top-color: #9013FE; }
+    
+    .role-icon { font-size: 55px; margin-bottom: 20px; }
+    .role-title { font-size: 1.6rem; font-weight: bold; margin-bottom: 15px; color: #333; }
+    .role-desc { font-size: 0.95rem; color: #777; line-height: 1.6; margin-bottom: 30px; }
+    
+    .role-btn { display: inline-block; padding: 12px 25px; border-radius: 25px; font-weight: bold; color: white; transition: 0.3s; }
+    .role-card.student .role-btn { background: #4A90E2; }
+    .role-card.employer .role-btn { background: #9013FE; }
+    .role-card.student:hover .role-btn { background: #357abd; box-shadow: 0 4px 15px rgba(74, 144, 226, 0.4); }
+    .role-card.employer:hover .role-btn { background: #7b10d6; box-shadow: 0 4px 15px rgba(144, 19, 254, 0.4); }
+{% endblock %}
+
+{% block content %}
+<div class="welcome-container">
+    <h1 class="hero-title">Welcome to 
+        <span class="gradient-text notranslate" translate="no">
+            <span class="brand-en">Darbak.AI</span>
+            <span class="brand-ar">دربك</span>
+        </span>
+    </h1>
+    <p class="hero-subtitle">
+        The intelligent platform connecting Arab Open University talent with top employers.<br>
+        Powered by ACM/IEEE CC2020 Global Standards.
+    </p>
+
+    <div class="cards-wrapper">
+        <a href="/register/student" class="role-card student">
+            <div class="role-icon">🎓</div>
+            <div class="role-title">For Students</div>
+            <div class="role-desc">Build your profile, evaluate your skills against global standards, and discover your career readiness.</div>
+            <span class="role-btn">Join as Student</span>
+        </a>
+        <a href="/register/employer" class="role-card employer">
+            <div class="role-icon">💼</div>
+            <div class="role-title">For Employers</div>
+            <div class="role-desc">Find top talent tailored to your specific job roles, fully verified and evaluated by AI.</div>
+            <span class="role-btn">Join as Employer</span>
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Darbak.AI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #4A90E2, #9013FE); 
+            height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            margin: 0; 
+        }
+
+       .card { 
+            background: white; 
+            padding: 40px 30px; 
+            border-radius: 15px; 
+            width: 90%; /* التعديل هنا: يأخذ 90% من الشاشة */
+            max-width: 360px; /* لكن لا يتجاوز 360 بكسل في اللابتوب */
+            text-align: center; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2); 
+            box-sizing: border-box;
+        }
+        
+        h1 { 
+            color: #4A90E2; 
+            margin-bottom: 5px; 
+            font-size: 28px;
+        }
+
+        p { 
+            color: #666; 
+            font-size: 14px; 
+            margin-bottom: 25px; 
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        input { 
+            width: 100%; 
+            padding: 12px; 
+            border: 1px solid #ddd; 
+            border-radius: 6px; 
+            box-sizing: border-box; 
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: #4A90E2;
+            outline: none;
+        }
+
+        /* تنسيق أيقونة العين */
+        .password-container {
+            position: relative;
+        }
+        .password-container i {
+            position: absolute;
+            right: 12px;
+            top: 14px;
+            color: #888;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .password-container i:hover {
+            color: #4A90E2;
+        }
+
+        button { 
+            width: 100%; 
+            padding: 14px; 
+            background: linear-gradient(to right, #4A90E2, #9013FE); 
+            color: white; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            margin-top: 15px; 
+            font-weight: bold; 
+            font-size: 16px;
+            transition: opacity 0.3s;
+        }
+
+        button:hover { 
+            opacity: 0.9; 
+        }
+
+        .link { 
+            display: block; 
+            margin-top: 20px; 
+            font-size: 14px; 
+            color: #666; 
+            text-decoration: none; 
+        }
+
+        .link span { 
+            color: #9013FE; 
+            font-weight: bold; 
+        }
+
+        .link:hover span {
+            text-decoration: underline;
+        }
+
+        /* زر نسيت كلمة المرور المؤقت */
+        .forgot-pass {
+            display: block;
+            text-align: right;
+            font-size: 11px;
+            color: #4A90E2;
+            text-decoration: none;
+            margin-top: 5px;
+        }
+        .forgot-pass:hover {
+            text-decoration: underline;
+        }
+
+        .alert { 
+            color: #e74c3c; 
+            background-color: #fdecea;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 13px; 
+            display: none; 
+            margin-top: 15px; 
+            border: 1px solid #fadbd8;
+        }
+
+        .footer-note {
+            margin-top: 25px; 
+            font-size: 12px; 
+            color: #999; 
+            border-top: 1px solid #eee; 
+            padding-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Darbak.AI</h1>
+        <p>Your Intelligent Career Companion</p>
+        
+        <form id="loginForm">
+            <div class="input-group">
+                <label>Email Address</label>
+                <input type="email" id="email" placeholder="name@example.com" required>
+            </div>
+            
+            <div class="input-group">
+                <label>Password</label>
+                <div class="password-container">
+                    <input type="password" id="password" placeholder="••••••••" required style="padding-right: 40px;">
+                    <i class="fas fa-eye" id="togglePassword"></i>
+                </div>
+                <a href="#" class="forgot-pass" onclick="alert('Password reset feature coming soon!')">Forgot Password?</a>
+            </div>
+
+            <button type="submit">Login</button>
+            <div id="errorMsg" class="alert"></div>
+        </form>
+
+        <a href="/register/student" class="link">Don't have an account? <span>Create Account</span></a>
+        
+        <div class="footer-note">
+            For Employers: Use <b>admin</b> / <b>admin</b>
+        </div>
+    </div>
+
+    <script>
+        // برمجة أيقونة العين
+        document.getElementById('togglePassword').addEventListener('click', function () {
+            const passwordInput = document.getElementById('password');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                this.classList.remove('fa-eye');
+                this.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                this.classList.remove('fa-eye-slash');
+                this.classList.add('fa-eye');
+            }
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btn = document.querySelector('button');
+            const errorMsg = document.getElementById('errorMsg');
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            btn.innerText = "Signing in...";
+            btn.disabled = true;
+            errorMsg.style.display = 'none';
+
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    })
+                });
+
+                const data = await res.json();
+                
+                if (data.status === 'success') {
+                    if (data.user_data) {
+                        localStorage.setItem('darbak_user', JSON.stringify(data.user_data));
+                        // حفظ دور المستخدم مهم جداً لصفحة التعديل
+                        localStorage.setItem('darbak_role', data.role);
+                    }
+                    window.location.href = data.redirect; 
+                } else {
+                    errorMsg.innerText = data.message;
+                    errorMsg.style.display = 'block';
+                    btn.innerText = "Login";
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                console.error(err);
+                errorMsg.innerText = "Connection error. Please try again.";
+                errorMsg.style.display = 'block';
+                btn.innerText = "Login";
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html> 

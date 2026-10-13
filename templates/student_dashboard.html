@@ -1,0 +1,439 @@
+{% extends "base.html" %}
+
+{% block title %}My Dashboard - Darbak.AI{% endblock %}
+
+{% block header_actions %}
+    <a href="/profile" class="profile-btn">👤 My Profile</a>
+    <a href="javascript:void(0)" onclick="logout()" class="logout-btn">Logout</a>
+{% endblock %}
+
+{% block extra_css %}
+    .dashboard-container { display: flex; gap: 20px; max-width: 1200px; width: 100%; margin: 0 auto; }
+    
+    .profile-card { flex: 1; background: white; padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); height: fit-content; position: sticky; top: 100px;}
+    .profile-img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid #4A90E2; margin-bottom: 15px; }
+    .student-name { font-size: 22px; font-weight: bold; color: #2c3e50; margin: 0; }
+    .student-major { color: #7f8c8d; font-size: 14px; margin-bottom: 20px; }
+    .info-list { text-align: left; margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px; }
+    .info-item { margin-bottom: 10px; font-size: 14px; color: #555; display: flex; justify-content: space-between; }
+    .info-item span { font-weight: bold; color: #333; }
+    
+    .score-badge-card { background: linear-gradient(135deg, #f8f9fa, #e9ecef); border: 1px solid #ddd; border-radius: 10px; padding: 20px 15px; text-align: center; margin-top: 20px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.02); }
+    .score-badge-card .title { font-size: 12px; color: #555; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+    .score-badge-card .score { font-size: 38px; font-weight: bold; color: #9013FE; margin: 5px 0; transition: color 0.3s; }
+    .score-badge-card .status { font-size: 13px; color: #777; font-weight: 600; transition: color 0.3s; }
+
+    .analysis-card { flex: 2; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .header-title { display: flex; align-items: center; margin-bottom: 20px; }
+    .header-title h2 { margin: 0; color: #9013FE; }
+    
+    .input-group { margin-bottom: 20px; position: relative; }
+    label { display: block; font-weight: bold; margin-bottom: 8px; font-size: 13px; color: #555; }
+    input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+    .row { display: flex; gap: 15px; }
+
+    .tags-container { border: 1px solid #ddd; border-radius: 6px; padding: 5px; display: flex; flex-wrap: wrap; gap: 5px; min-height: 42px; background: #fff; cursor: text; }
+    .tag { background: #eef2f7; color: #4A90E2; padding: 5px 10px; border-radius: 15px; font-size: 13px; display: flex; align-items: center; gap: 5px; border: 1px solid #dbe4f0; }
+    .tag.soft { background: #f3e5f5; color: #9013FE; border-color: #e1bee7; }
+    .tag i { cursor: pointer; font-style: normal; font-weight: bold; }
+    .tag i:hover { color: red; }
+    .tag-input { border: none; outline: none; flex: 1; min-width: 120px; padding: 5px; font-size: 14px; }
+    .suggestions-list { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ddd; border-radius: 6px; max-height: 200px; overflow-y: auto; z-index: 100; display: none; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+    .suggestion-item { padding: 10px; cursor: pointer; font-size: 14px; }
+    .suggestion-item:hover { background: #f0f2f5; color: #9013FE; }
+
+    button.analyze-btn { width: 100%; padding: 14px; background: linear-gradient(to right, #4A90E2, #9013FE); color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; margin-top: 10px; font-weight: bold; box-shadow: 0 4px 10px rgba(144, 19, 254, 0.2); transition: 0.3s; }
+    button.analyze-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+
+    #result-area { margin-top: 30px; display: none; border-top: 2px solid #f0f0f0; padding-top: 20px; }
+    .courses-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 15px; }
+    .course-card { background: #fff; border: 1px solid #eee; border-radius: 8px; padding: 15px; transition: transform 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-left: 4px solid #4A90E2; }
+    .course-card:hover { transform: translateY(-3px); border-color: #9013FE; border-left: 4px solid #9013FE; }
+    .course-skill { font-size: 11px; text-transform: uppercase; color: #e74c3c; font-weight: bold; margin-bottom: 5px; }
+    .course-title { font-size: 14px; font-weight: bold; color: #333; margin-bottom: 5px; line-height: 1.4; }
+    .course-provider { font-size: 12px; color: #666; margin-bottom: 10px; }
+    .course-link { display: inline-block; font-size: 12px; color: #4A90E2; text-decoration: none; font-weight: bold; background: #f0f2f5; padding: 5px 10px; border-radius: 4px; }
+    .course-link:hover { background: #e0e5ec; }
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    
+    <div class="profile-card">
+        <img id="p_img" src="/static/uploads/default.jpg" class="profile-img" alt="Profile">
+        <h3 class="student-name notranslate" translate="no" id="p_name">Student Name</h3>
+        <p class="student-major notranslate" translate="no" id="p_major_title">Major not set</p>
+        
+        <div class="info-list">
+            <div class="info-item">Email <span id="p_email" class="notranslate" translate="no">-</span></div>
+            <div class="info-item"><span class="notranslate" translate="no">GPA</span> <span id="p_gpa" class="notranslate" translate="no">-</span></div>
+            <div class="info-item" style="color: #2ecc71; font-size: 13px; border-bottom: 1px solid #eee; padding-bottom: 20px; margin-bottom: 10px;">
+                <span>✓ Verified from Transcript</span>
+            </div>
+
+            <div class="score-badge-card">
+                <div class="title"><span class="notranslate" translate="no">CC2020</span> Readiness</div>
+                <div class="score notranslate" translate="no" id="left-score-display">--%</div>
+                <div class="status" id="left-status-display">Pending Evaluation</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="analysis-card">
+        <div class="header-title">
+            <h2>🎓 <span class="notranslate" translate="no">CC2020</span> Career Readiness</h2>
+        </div>
+        
+        <p style="color:#666; font-size:14px; margin-bottom:20px; line-height: 1.6;">
+            Your academic data is officially verified. Select your target job and update your skills to evaluate your readiness based on the <b><span class="notranslate" translate="no">ACM/IEEE CC2020</span> Standards</b>.
+        </p>
+
+        <div class="row">
+            <div class="input-group" style="flex:1">
+                <label>Verified Major</label>
+                <input type="text" id="major" readonly style="background:#e9ecef; cursor: not-allowed; color: #555; font-weight: bold;" class="notranslate" translate="no">
+            </div>
+            
+            <div class="input-group" style="flex:1">
+                <label>Verified <span class="notranslate" translate="no">GPA</span></label>
+                <div style="display:flex; gap:10px">
+                    <input type="number" id="gpa" readonly style="flex:1; background:#e9ecef; cursor: not-allowed; font-weight: bold; color: #555;" class="notranslate" translate="no">
+                    <input type="text" id="gpa_scale" readonly style="flex:1; background:#e9ecef; cursor: not-allowed; font-weight: bold; color: #555;" class="notranslate" translate="no">
+                </div>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label style="color: #4A90E2; font-size: 14px;">🎯 Target Job Title</label>
+            <select id="target_job" style="border: 2px solid #4A90E2; padding: 12px; font-weight: bold; font-size: 15px; cursor: pointer; color:#333;" class="notranslate" translate="no">
+                <option value="Software Developer / Engineer">Software Developer / Engineer</option>
+                <option value="Data Scientist / Analyst">Data Scientist / Analyst</option>
+                <option value="Cybersecurity Analyst / Professional">Cybersecurity Analyst</option>
+                <option value="Database Administrator">Database Administrator</option>
+                <option value="Network/Systems Administrator">Network/Systems Administrator</option>
+                <option value="Business Systems Analyst">Business Systems Analyst</option>
+                <option value="Embedded Systems Engineer">Embedded Systems Engineer</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>Technical Skills <span id="skills-hint" style="font-weight:normal; color:#888; font-size:12px;"></span></label>
+            <div class="tags-container notranslate" translate="no" id="tech-tags-container" onclick="document.getElementById('tech-input').focus()">
+                <input type="text" class="tag-input" id="tech-input" placeholder="Add technical skills...">
+            </div>
+            <div class="suggestions-list notranslate" translate="no" id="tech-list"></div>
+        </div>
+
+        <div class="input-group">
+            <label>Soft Skills & Dispositions</label>
+            <div class="tags-container notranslate" translate="no" id="soft-tags-container" onclick="document.getElementById('soft-input').focus()">
+                <input type="text" class="tag-input" id="soft-input" placeholder="Add soft skills...">
+            </div>
+            <div class="suggestions-list notranslate" translate="no" id="soft-list"></div>
+        </div>
+
+        <button onclick="analyze()" class="analyze-btn">Check Readiness via CC2020</button>
+
+        <div id="result-area">
+            
+            <div id="ai-mentorship-container" class="notranslate" translate="no" style="display:none; margin-bottom:30px; background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-left: 5px solid #9013FE;">
+                <h3 style="color:#2c3e50; font-size:18px; margin-top:0; margin-bottom:15px; display: flex; align-items: center; gap: 10px;">
+                    🤖 
+                    <span class="notranslate" translate="no">
+                        <span class="brand-en">Darbak.AI</span>
+                        <span class="brand-ar">دربك</span>
+                    </span>
+                     Mentor Says:
+                </h3>
+                <div id="ai-roadmap-content" style="font-size: 15px; line-height: 1.6; color: #333;">
+                    </div>
+            </div>
+
+            <div id="recommendations-container" style="display:none; margin-bottom:30px;">
+                <h3 style="color:#2c3e50; font-size:18px; margin-bottom:15px; border-bottom: 2px solid #f0f0f0; padding-bottom:10px;">📚 Recommended Courses for Missing CC2020 Competencies</h3>
+                <div id="courses-grid" class="courses-grid"></div>
+            </div>
+
+            <div style="height: 350px; display:flex; justify-content:center; background: #fdfdfd; border-radius: 10px; padding: 20px; border: 1px solid #eee;"><canvas id="skillsChart"></canvas></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const skillsByMajor = {
+        "Information Technology": ["Python", "Java", "SQL", "Cyber Security", "Networking", "Cloud Computing", "Linux"],
+        "Computer Science": ["Algorithms", "Data Structures", "Java", "C++", "Python", "Software Design", "Machine Learning"],
+        "Computer Engineering": ["Digital Logic", "Circuits and Systems", "Embedded Systems", "Computer Architecture", "C++"],
+        "Information Systems": ["Analysis of Business Requirements", "Database Practice", "E-business", "Project Management", "SQL"],
+        "Software Engineering": ["Software Design", "Software Process", "Algorithms", "Java", "Programming Fundamentals"],
+        "Cybersecurity": ["Network Security", "Cryptography", "Risk Management", "Ethical Hacking"],
+        "Data Science": ["Machine Learning", "Statistics", "Data Mining", "Big Data", "Python"]
+    };
+    
+    const defaultTechSkills = ["Computer Literacy", "Programming Fundamentals", "Data Analysis"];
+    
+    const allSoftSkills = [
+        "Communication", "Teamwork", "Leadership", "Problem Solving", "Time Management", 
+        "Critical Thinking", "Meticulous", "Inventive", "Collaborative", "Analytical", 
+        "Proactive", "Purpose-driven", "Responsible", "Professional", "Adaptable", "Responsive"
+    ];
+
+    let selectedTech = [];
+    let selectedSoft = [];
+    let currentAvailableTechSkills = defaultTechSkills;
+
+    window.onload = function() {
+        const userStr = localStorage.getItem('darbak_user');
+        if (!userStr) { window.location.href = '/login'; return; }
+        const user = JSON.parse(userStr);
+
+        document.getElementById('p_name').innerText = user.name;
+        document.getElementById('p_email').innerText = user.email || "-";
+        
+        if(user.major) {
+            document.getElementById('p_major_title').innerText = user.major;
+            document.getElementById('major').value = user.major;
+            updateAvailableSkills(user.major);
+        }
+        
+        if(user.gpa > 0) {
+            document.getElementById('p_gpa').innerText = `${user.gpa} / ${user.gpa_scale || 4.0}`;
+            document.getElementById('gpa').value = user.gpa;
+            document.getElementById('gpa_scale').value = `Scale ${user.gpa_scale || 4.0}`;
+        }
+
+        if(user.profile_pic) document.getElementById('p_img').src = `/static/uploads/${user.profile_pic}`;
+
+        if(user.target_job) {
+            const jobSelect = document.getElementById('target_job');
+            if([...jobSelect.options].some(o => o.value === user.target_job)) {
+                jobSelect.value = user.target_job;
+            }
+        }
+
+        if(user.last_score !== undefined && user.last_score !== null) {
+            updateScoreUI(user.last_score, user.last_status);
+        }
+
+        if (user.skills && user.skills.length > 0) user.skills.forEach(s => addTag(s.trim(), 'tech'));
+        if (user.soft_skills && user.soft_skills.length > 0) user.soft_skills.forEach(s => addTag(s.trim(), 'soft'));
+
+        setupAutocomplete('tech-input', 'tech-list', null, 'tech'); 
+        setupAutocomplete('soft-input', 'soft-list', allSoftSkills, 'soft');
+
+        // ==========================================
+        // 🌟 استعادة التحليل المزدوج بناءً على لغة الموقع 🌟
+        // ==========================================
+        if (user.last_roadmap_en || user.last_roadmap_ar || (user.last_recommended && user.last_recommended.length > 0)) {
+            document.getElementById('result-area').style.display = 'block';
+
+            let currentSiteLang = localStorage.getItem('darbak_lang') || 'en';
+            let roadmapToShow = currentSiteLang === 'ar' ? user.last_roadmap_ar : user.last_roadmap_en;
+
+            if (roadmapToShow) {
+                document.getElementById('ai-mentorship-container').style.display = 'block';
+                document.getElementById('ai-roadmap-content').innerHTML = roadmapToShow; 
+            }
+
+            const recContainer = document.getElementById('recommendations-container');
+            const grid = document.getElementById('courses-grid');
+            grid.innerHTML = "";
+            
+            if (user.last_recommended && user.last_recommended.length > 0) {
+                recContainer.style.display = 'block';
+                user.last_recommended.forEach(c => {
+                    const card = `
+                        <div class="course-card">
+                            <div class="course-skill"><span class="notranslate" translate="no">Missing: ${c.skill}</span></div>
+                            <div class="course-title">${c.title}</div>
+                            <div class="course-provider">Source: <span class="notranslate" translate="no">${c.provider}</span></div>
+                            <a href="${c.link}" target="_blank" class="course-link">Find Course →</a>
+                        </div>
+                    `;
+                    grid.innerHTML += card;
+                });
+            }
+
+            if (user.last_matched && user.last_missing) {
+                setTimeout(() => renderChart(user.last_matched, user.last_missing), 100);
+            }
+        }
+    };
+
+    function updateAvailableSkills(majorName) {
+        const foundMajor = Object.keys(skillsByMajor).find(k => majorName.toLowerCase().includes(k.toLowerCase()));
+        if (foundMajor) {
+            currentAvailableTechSkills = skillsByMajor[foundMajor];
+            document.getElementById('skills-hint').innerText = `(Suggested for ${foundMajor})`;
+        } else {
+            currentAvailableTechSkills = defaultTechSkills;
+            document.getElementById('skills-hint').innerText = "(Generic Skills)";
+        }
+    }
+
+    function addTag(value, type) {
+        value = value.trim(); if(!value) return;
+        let list = (type === 'tech') ? selectedTech : selectedSoft;
+        let container = document.getElementById(type === 'tech' ? 'tech-tags-container' : 'soft-tags-container');
+        let input = document.getElementById(type === 'tech' ? 'tech-input' : 'soft-input');
+        if (list.includes(value)) { input.value = ''; return; }
+        list.push(value);
+        const tag = document.createElement('div');
+        tag.classList.add('tag');
+        if(type === 'soft') tag.classList.add('soft');
+        tag.innerHTML = `${value} <i onclick="removeTag('${value}', '${type}', this)">×</i>`;
+        container.insertBefore(tag, input);
+        input.value = '';
+    }
+
+    function removeTag(value, type, element) {
+        let list = (type === 'tech') ? selectedTech : selectedSoft;
+        const index = list.indexOf(value);
+        if (index > -1) list.splice(index, 1);
+        element.parentElement.remove();
+    }
+
+    function setupAutocomplete(inputId, listId, sourceArray, type) {
+        const input = document.getElementById(inputId);
+        const list = document.getElementById(listId);
+        input.addEventListener('input', function() {
+            const val = this.value.toLowerCase();
+            list.innerHTML = '';
+            if (!val) { list.style.display = 'none'; return; }
+            
+            const arr = (type === 'tech') ? currentAvailableTechSkills : sourceArray;
+            const matches = arr.filter(s => s.toLowerCase().includes(val));
+            
+            if (matches.length > 0) {
+                list.style.display = 'block';
+                matches.forEach(match => {
+                    const div = document.createElement('div');
+                    div.classList.add('suggestion-item');
+                    div.innerText = match;
+                    div.onclick = function() {
+                        addTag(match, type);
+                        list.style.display = 'none';
+                    };
+                    list.appendChild(div);
+                });
+            } else { list.style.display = 'none'; }
+        });
+        document.addEventListener('click', e => { if(e.target !== input && e.target !== list) list.style.display = 'none'; });
+        if(type !== 'major') input.addEventListener('keydown', e => { if(e.key === 'Enter') { e.preventDefault(); addTag(input.value, type); list.style.display='none'; }});
+    }
+
+    function updateScoreUI(score, status) {
+        const scoreEl = document.getElementById('left-score-display');
+        const statusEl = document.getElementById('left-status-display');
+        
+        scoreEl.innerText = score + "%";
+        statusEl.innerText = status;
+        
+        if (score >= 75) {
+            scoreEl.style.color = '#2ecc71'; 
+            statusEl.style.color = '#2ecc71';
+        } else {
+            scoreEl.style.color = '#f39c12'; 
+            statusEl.style.color = '#f39c12';
+        }
+    }
+
+    let myChart = null;
+
+    async function analyze() {
+        const userStr = localStorage.getItem('darbak_user'); if (!userStr) return;
+        const user = JSON.parse(userStr);
+        const btn = document.querySelector('.analyze-btn');
+        btn.innerText = "✨ AI is analyzing your profile..."; btn.disabled = true;
+
+        const currentLang = localStorage.getItem('darbak_lang') || 'en';
+
+        const requestData = {
+            email: user.email,
+            major: document.getElementById('major').value,  
+            gpa: parseFloat(document.getElementById('gpa').value), 
+            job_title: document.getElementById('target_job').value, 
+            skills: selectedTech,
+            soft_skills: selectedSoft,
+            lang: currentLang  
+        };
+
+        try {
+            const res = await fetch('/api/analyze', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(requestData)
+            });
+
+            const result = await res.json();
+            
+            user.skills = requestData.skills; 
+            user.soft_skills = requestData.soft_skills;
+            user.target_job = requestData.job_title;
+            user.last_score = result.readiness_score;
+            user.last_status = result.status;
+            
+            // حفظ النسختين في الذاكرة
+            user.last_roadmap_en = result.ai_roadmap_en;
+            user.last_roadmap_ar = result.ai_roadmap_ar;
+            user.last_recommended = result.recommended_courses;
+            user.last_matched = result.matched_skills;
+            user.last_missing = result.missing_skills;
+            
+            localStorage.setItem('darbak_user', JSON.stringify(user));
+            
+            updateScoreUI(result.readiness_score, result.status);
+            document.getElementById('result-area').style.display = 'block';
+
+            // عرض النسخة بناءً على اللغة المختارة لحظة الضغط
+            let roadmapToShow = currentLang === 'ar' ? result.ai_roadmap_ar : result.ai_roadmap_en;
+
+            if (roadmapToShow) {
+                document.getElementById('ai-mentorship-container').style.display = 'block';
+                document.getElementById('ai-roadmap-content').innerHTML = roadmapToShow; 
+            } else {
+                document.getElementById('ai-mentorship-container').style.display = 'none';
+            }
+
+            const recContainer = document.getElementById('recommendations-container');
+            const grid = document.getElementById('courses-grid');
+            grid.innerHTML = "";
+            
+            if (result.recommended_courses && result.recommended_courses.length > 0) {
+                recContainer.style.display = 'block';
+                result.recommended_courses.forEach(c => {
+                    const card = `
+                        <div class="course-card">
+                            <div class="course-skill"><span class="notranslate" translate="no">Missing: ${c.skill}</span></div>
+                            <div class="course-title">${c.title}</div>
+                            <div class="course-provider">Source: <span class="notranslate" translate="no">${c.provider}</span></div>
+                            <a href="${c.link}" target="_blank" class="course-link">Find Course →</a>
+                        </div>
+                    `;
+                    grid.innerHTML += card;
+                });
+            } else {
+                recContainer.style.display = 'none';
+            }
+
+            renderChart(result.matched_skills, result.missing_skills);
+
+        } catch (error) { console.error(error); alert("Error connecting to server."); } 
+        finally { btn.innerText = "Check Readiness via CC2020"; btn.disabled = false; }
+    }
+
+    function renderChart(matched, missing) {
+        const ctx = document.getElementById('skillsChart').getContext('2d');
+        if(myChart) myChart.destroy();
+        const labels = [...matched, ...missing];
+        const data = [...matched.map(()=>100), ...missing.map(()=>20)];
+        myChart = new Chart(ctx, {
+            type: 'radar',
+            data: { labels: labels, datasets: [{ label: 'Skill Level', data: data, backgroundColor: 'rgba(144, 19, 254, 0.2)', borderColor: '#9013FE', borderWidth: 2, pointBackgroundColor: '#9013FE' }] },
+            options: { scales: { r: { suggestedMin: 0, suggestedMax: 100 } }, plugins: { legend: { display: false } }, maintainAspectRatio: false }
+        });
+    }
+</script>
+{% endblock %}

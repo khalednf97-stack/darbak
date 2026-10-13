@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Profile - Darbak.AI{% endblock %}
+
+{% block header_actions %}
+    <a href="javascript:void(0)" onclick="goBack()" class="profile-btn">🔙 Back to Dashboard</a>
+    <a href="javascript:void(0)" onclick="logout()" class="logout-btn">Logout</a>
+{% endblock %}
+
+{% block extra_css %}
+    .profile-container { max-width: 800px; margin: 40px auto; background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+    .page-title { text-align: center; color: #9013FE; margin-bottom: 30px; font-size: 28px; font-weight: bold; }
+    
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .full-width { grid-column: 1 / -1; }
+    
+    .input-group { position: relative; margin-bottom: 15px; }
+    .input-group i.left-icon { position: absolute; left: 15px; top: 14px; color: #888; font-size: 16px; }
+    .input-group input, .input-group select { width: 100%; padding: 12px 15px 12px 45px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; box-sizing: border-box; background: #fdfdfd; transition: 0.3s; }
+    .input-group input:focus, .input-group select:focus { border-color: #9013FE; outline: none; background: #fff; box-shadow: 0 0 5px rgba(144, 19, 254, 0.2); }
+    
+    .section-title { font-size: 16px; color: #333; margin: 20px 0 10px; border-bottom: 2px solid #eee; padding-bottom: 5px; grid-column: 1 / -1; }
+
+    .file-upload { background: #f8f9fa; border: 2px dashed #ddd; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 15px; cursor: pointer; transition: 0.3s; }
+    .file-upload:hover { border-color: #9013FE; background: #f3e8ff; }
+    .file-upload label { cursor: pointer; font-weight: bold; color: #555; display: block; }
+    .file-upload input { display: none; }
+    .file-name { font-size: 12px; color: #9013FE; margin-top: 5px; display: block; }
+
+    button.submit-btn { width: 100%; padding: 15px; background: linear-gradient(to right, #4A90E2, #9013FE); color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 20px; transition: 0.3s; grid-column: 1 / -1; }
+    button.submit-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <h2 class="page-title">⚙️ Edit Profile Settings</h2>
+    
+    <form id="updateForm" onsubmit="handleUpdate(event)" class="form-grid">
+        <input type="hidden" name="role" id="userRole">
+        <input type="hidden" name="email" id="userEmail">
+
+        <div id="studentFields" style="display: none;" class="form-grid full-width">
+            <div class="section-title">Personal Information</div>
+            
+            <div class="input-group">
+                <i class="fas fa-user left-icon"></i>
+                <input type="text" name="first_name" id="s_first_name" placeholder="First Name">
+            </div>
+            <div class="input-group">
+                <i class="fas fa-user left-icon"></i>
+                <input type="text" name="last_name" id="s_last_name" placeholder="Last Name">
+            </div>
+            <div class="input-group">
+                <i class="fas fa-phone left-icon"></i>
+                <input type="text" name="phone" id="s_phone" placeholder="Phone Number">
+            </div>
+            <div class="input-group">
+                <i class="fas fa-lock left-icon"></i>
+                <input type="password" name="password" placeholder="New Password (leave blank to keep current)">
+            </div>
+
+            <div class="input-group">
+                <i class="fas fa-venus-mars left-icon"></i>
+                <select name="gender" id="s_gender">
+                    <option value="" disabled>Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <i class="fas fa-flag left-icon"></i>
+                <input type="text" name="nationality" id="s_nationality" placeholder="Nationality">
+            </div>
+            <div class="input-group full-width">
+                <i class="fas fa-map-marker-alt left-icon"></i>
+                <input type="text" name="location" id="s_location" placeholder="City of Residence">
+            </div>
+
+            <div class="section-title">Academic Re-Verification</div>
+            <p style="grid-column: 1/-1; font-size:12px; color:#e74c3c; margin-top: -5px;">⚠️ If you change your Major or GPA, you MUST upload a new transcript.</p>
+
+            <div class="input-group">
+                <i class="fas fa-graduation-cap left-icon"></i>
+                <select name="major" id="s_major">
+                    <option value="Computer Science">Computer Science</option>
+                    <option value="Software Engineering">Software Engineering</option>
+                    <option value="Information Technology">Information Technology</option>
+                    <option value="Information Systems">Information Systems</option>
+                    <option value="Computer Engineering">Computer Engineering</option>
+                    <option value="Cybersecurity">Cybersecurity</option>
+                    <option value="Data Science">Data Science</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <i class="fas fa-star left-icon"></i>
+                <input type="number" step="0.01" name="gpa" id="s_gpa" placeholder="New GPA">
+            </div>
+
+            <div class="section-title">Update Links & Files</div>
+
+            <div class="input-group">
+                <i class="fab fa-linkedin left-icon"></i>
+                <input type="url" name="linkedin_link" id="s_linkedin" placeholder="LinkedIn Link">
+            </div>
+            <div class="input-group">
+                <i class="fab fa-github left-icon"></i>
+                <input type="url" name="github_link" id="s_github" placeholder="GitHub Link">
+            </div>
+            <div class="input-group full-width">
+                <i class="fas fa-globe left-icon"></i>
+                <input type="url" name="portfolio_link" id="s_portfolio" placeholder="Portfolio / Website Link">
+            </div>
+
+            <div class="file-upload full-width" onclick="document.getElementById('transcript').click()">
+                <label>📄 Upload New Transcript (Only if changing GPA/Major)</label>
+                <input type="file" id="transcript" name="transcript_file" accept=".pdf" onchange="updateFileName('transcript', 'trans_name')">
+                <span class="file-name" id="trans_name"></span>
+            </div>
+
+            <div class="file-upload" onclick="document.getElementById('cv').click()">
+                <label>📄 Update CV (PDF)</label>
+                <input type="file" id="cv" name="cv_file" accept=".pdf" onchange="updateFileName('cv', 'cv_name')">
+                <span class="file-name" id="cv_name"></span>
+            </div>
+
+            <div class="file-upload" onclick="document.getElementById('pic').click()">
+                <label>🖼️ Update Profile Picture</label>
+                <input type="file" id="pic" name="profile_pic" accept="image/*" onchange="updateFileName('pic', 'pic_name')">
+                <span class="file-name" id="pic_name"></span>
+            </div>
+        </div>
+
+        <div id="employerFields" style="display: none;" class="form-grid full-width">
+            <div class="input-group full-width">
+                <i class="fas fa-building left-icon"></i>
+                <input type="text" name="company_name" id="e_company" placeholder="Company Name">
+            </div>
+            <div class="input-group">
+                <i class="fas fa-user-tie left-icon"></i>
+                <input type="text" name="recruiter_name" id="e_recruiter" placeholder="Recruiter Name">
+            </div>
+            <div class="input-group">
+                <i class="fas fa-id-badge left-icon"></i>
+                <input type="text" name="job_title" id="e_job" placeholder="Your Job Title">
+            </div>
+            <div class="input-group">
+                <i class="fas fa-phone left-icon"></i>
+                <input type="text" name="phone" id="e_phone" placeholder="Phone Number">
+            </div>
+            <div class="input-group">
+                <i class="fas fa-globe left-icon"></i>
+                <input type="url" name="website" id="e_website" placeholder="Company Website">
+            </div>
+            <div class="input-group full-width">
+                <i class="fab fa-linkedin left-icon"></i>
+                <input type="url" name="linkedin_link" id="e_linkedin" placeholder="LinkedIn Profile URL">
+            </div>
+            <div class="input-group full-width">
+                <i class="fas fa-lock left-icon"></i>
+                <input type="password" name="password" placeholder="New Password (leave blank to keep current)">
+            </div>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">Save Changes</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let userRole = '';
+
+    window.onload = function() {
+        const userStr = localStorage.getItem('darbak_user');
+        const roleStr = localStorage.getItem('darbak_role');
+        if (!userStr || !roleStr) { window.location.href = '/login'; return; }
+        
+        const user = JSON.parse(userStr);
+        userRole = roleStr;
+        
+        document.getElementById('userRole').value = roleStr;
+        document.getElementById('userEmail').value = user.work_email || user.email;
+
+        if (roleStr === 'student') {
+            document.getElementById('studentFields').style.display = 'grid';
+            // تعطيل حقول الشركة لكي لا تُرسل مع الفورم
+            document.querySelectorAll('#employerFields input').forEach(el => el.disabled = true);
+
+            document.getElementById('s_first_name').value = user.first_name || '';
+            document.getElementById('s_last_name').value = user.last_name || '';
+            document.getElementById('s_phone').value = user.phone || '';
+            
+            if(user.gender) document.getElementById('s_gender').value = user.gender;
+            if(user.nationality) document.getElementById('s_nationality').value = user.nationality;
+            if(user.location) document.getElementById('s_location').value = user.location;
+
+            document.getElementById('s_major').value = user.major || '';
+            document.getElementById('s_gpa').value = user.gpa || '';
+            document.getElementById('s_linkedin').value = user.linkedin_link || '';
+            document.getElementById('s_github').value = user.github_link || '';
+            document.getElementById('s_portfolio').value = user.portfolio_link || '';
+        } else {
+            document.getElementById('employerFields').style.display = 'grid';
+            // تعطيل حقول الطالب لكي لا تُرسل مع الفورم
+            document.querySelectorAll('#studentFields input, #studentFields select').forEach(el => el.disabled = true);
+
+            document.getElementById('e_company').value = user.company || '';
+            document.getElementById('e_recruiter').value = user.recruiter || '';
+            document.getElementById('e_job').value = user.job_title || '';
+            document.getElementById('e_phone').value = user.phone || '';
+            document.getElementById('e_website').value = user.website || '';
+            document.getElementById('e_linkedin').value = user.linkedin_link || '';
+        }
+    };
+
+    function updateFileName(inputId, spanId) {
+        const file = document.getElementById(inputId).files[0];
+        if(file) document.getElementById(spanId).innerText = file.name;
+    }
+
+    function goBack() {
+        window.location.href = userRole === 'student' ? '/student' : '/employer';
+    }
+
+    async function handleUpdate(e) {
+        e.preventDefault();
+        const btn = document.getElementById('submitBtn');
+        const originalText = btn.innerText;
+        btn.innerText = "⏳ Saving Changes...";
+        btn.disabled = true;
+
+        const formData = new FormData(document.getElementById('updateForm'));
+
+        try {
+            const response = await fetch('/api/profile/update', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            
+            if(result.status === 'success') {
+                const oldUser = JSON.parse(localStorage.getItem('darbak_user'));
+                const newUser = { ...oldUser, ...result.user_data };
+                localStorage.setItem('darbak_user', JSON.stringify(newUser));
+                
+                alert(result.message);
+                goBack();
+            } else {
+                alert(result.message);
+            }
+        } catch (err) {
+            alert("Error connecting to server.");
+        } finally {
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
+    }
+</script>
+{% endblock %}
